@@ -29,6 +29,7 @@ public class HelloWorldService extends Service {
     private Timer timer;
     private static final String TAG = "EjemploServicio";
     private Metodos metodos = new Metodos();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -54,31 +55,35 @@ public class HelloWorldService extends Service {
         System.out.println("El servicio se ha iniciado");
         System.out.println("onStartCommand SERVICE");
 
+        try {
+            // Schedule the task to run every 5 minutes
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Connections connections = new Connections();
+                    System.out.println("EJECUTANDO TAREA");
 
-        // Schedule the task to run every 5 minutes
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Connections connections = new Connections();
-                System.out.println("EJECUTANDO TAREA");
-
-                Metodos metodos = new Metodos();
-                String filePath = "/data/data/com.example.myapplication/usuario.txt";
+                    Metodos metodos = new Metodos();
+                    String filePath = "/data/data/com.example.myapplication/usuario.txt";
 //                String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/usuario.txt";
-                File usernameFile = new File(filePath);
+                    File usernameFile = new File(filePath);
 
-                String usuario = metodos.readTextFile(usernameFile);
-                System.out.println("usuario de " + filePath + ": " + usuario);
-                if(connections.isValidoReporte(!usuario.isEmpty() ? usuario : "prueba").isValidoReporte()){
-                    System.out.println("El reporte es valido");
-                    HelloWorldTask task = new HelloWorldTask(connections);
-                    Thread thread = new Thread(task);
-                    thread.start();
-                }else{
-                    System.out.println("El reporte no es valido");
+                    String usuario = metodos.readTextFile(usernameFile);
+                    System.out.println("usuario de " + filePath + ": " + usuario);
+                    if (connections.isValidoReporte(!usuario.isEmpty() ? usuario : "prueba").isValidoReporte()) {
+                        System.out.println("El reporte es valido");
+                        HelloWorldTask task = new HelloWorldTask(connections);
+                        Thread thread = new Thread(task);
+                        thread.start();
+                    } else {
+                        System.out.println("El reporte no es valido");
+                    }
                 }
-            }
-        }, 0, 30000);
+            }, 0, 30000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return START_REDELIVER_INTENT;
     }
 
